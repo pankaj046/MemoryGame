@@ -29,7 +29,6 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.0
   shared_preferences: ^0.5.2
-  stop_watch_timer: ^0.7.0
 
 dev_dependencies:
   flutter_test:

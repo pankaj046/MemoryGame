@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:memory_game/data/data.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class GamePage extends StatefulWidget {
   @override
@@ -7,6 +10,10 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
+
+  Timer _timer;
+  String period = "";
+
   @override
   void initState() {
     // TODO: implement initState
@@ -19,8 +26,62 @@ class _GamePageState extends State<GamePage> {
       setState(() {
         visiblePairs = getQuestions();
         isSelected = false;
+        _gameTimer();
       });
     });
+  }
+
+
+
+  void _gameTimer() {
+    int second = 0, h = 0, m = 0, s = 0, temp = 0, i;
+
+
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      second++;
+
+      setState(() {
+        //For Hours
+        if (second >= 3600) {
+          temp = (second / 3600) as int;
+          h = temp;
+          for (i = 1; i <= temp; i++) {
+            second -= 3600;
+          }
+        } else {
+          h = 0;
+        }
+        //For Minutes
+        if (second >= 60) {
+          temp = (second / 60) as int;
+          m = temp;
+          for (i = 1; i <= temp; i++) {
+            second -= 60;
+          }
+        } else {
+          m = 0;
+        }
+        //For Seconds
+        if (second >= 1) {
+          s = second;
+        } else {
+          s = 0;
+        }
+      });
+      period = "$h:$m:$s";
+      print(period);
+
+      if(point == 800){
+
+        _timer.cancel();
+        _saveScore(period);
+      }
+    });
+  }
+
+  void _saveScore(String score) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('EASY', score);
   }
 
   @override
@@ -30,8 +91,8 @@ class _GamePageState extends State<GamePage> {
       debugShowCheckedModeBanner: false,
       home: point != 800
           ? Scaffold(
-        backgroundColor: Colors.white,
-            body: SingleChildScrollView(
+              backgroundColor: Colors.white,
+              body: SingleChildScrollView(
                 child: Container(
                   // height: MediaQuery.of(context).size.height,
                   padding: EdgeInsets.symmetric(vertical: 50, horizontal: 50),
@@ -53,7 +114,7 @@ class _GamePageState extends State<GamePage> {
                             height: 5,
                           ),
                           Text(
-                            "Points",
+                            period == ""? "00:00:00":period,
                             style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w500,
@@ -71,7 +132,8 @@ class _GamePageState extends State<GamePage> {
                               mainAxisSpacing: 0.0,
                               maxCrossAxisExtent: 100,
                             ),
-                            children: List.generate(visiblePairs.length, (index) {
+                            children:
+                                List.generate(visiblePairs.length, (index) {
                               return Tile(
                                 imagePath: visiblePairs[index].getImagePath(),
                                 parent: this,
@@ -85,7 +147,7 @@ class _GamePageState extends State<GamePage> {
                   ),
                 ),
               ),
-          )
+            )
           : Container(
               color: Colors.white,
               padding: EdgeInsets.all(30),

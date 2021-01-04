@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:memory_game/pages/GamePage.dart';
 import 'package:memory_game/pages/HardGamePage.dart';
-import 'package:memory_game/util/PreferenceManager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(MyApp());
@@ -18,14 +18,29 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
-
-
+  SharedPreferences prefs;
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+
+  String easy = "", hard = "";
+
+ @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _getScore();
+  }
+
+  void _getScore() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    easy =  prefs.getString('EASY');
+    hard =  prefs.getString('HARD');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,13 +73,10 @@ class _HomePageState extends State<HomePage> {
                       onTap: () {
                         Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(builder: (context) => GamePage()),
-                                (Route<dynamic> route) => false);
+                            (Route<dynamic> route) => false);
                       },
                       child: Container(
-                        width: MediaQuery
-                            .of(context)
-                            .size
-                            .width,
+                        width: MediaQuery.of(context).size.width,
                         height: 50,
                         alignment: Alignment.center,
                         color: Colors.amber,
@@ -87,13 +99,10 @@ class _HomePageState extends State<HomePage> {
                         Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(
                                 builder: (context) => HardGamePage()),
-                                (Route<dynamic> route) => false);
+                            (Route<dynamic> route) => false);
                       },
                       child: Container(
-                        width: MediaQuery
-                            .of(context)
-                            .size
-                            .width,
+                        width: MediaQuery.of(context).size.width,
                         height: 50,
                         alignment: Alignment.center,
                         color: Colors.amber,
@@ -113,8 +122,6 @@ class _HomePageState extends State<HomePage> {
                       borderRadius: BorderRadius.all(Radius.circular(16)),
                       splashColor: Colors.black12,
                       onTap: () {
-                        double easy = PreferenceManager.getDouble(PreferenceManager.EASY) as double;
-                        double hard = PreferenceManager.getDouble(PreferenceManager.HARD) as double;
                         showModalBottomSheet(
                             context: context,
                             builder: (BuildContext bc) {
@@ -122,38 +129,41 @@ class _HomePageState extends State<HomePage> {
                                 padding: EdgeInsets.all(30),
                                 child: Column(
                                   children: <Widget>[
-                                    Text("High Score", style: TextStyle(
-                                      fontSize: 30,
-                                      fontWeight: FontWeight.w600
-                                    ),),
+                                    Text(
+                                      "High Score",
+                                      style: TextStyle(
+                                          fontSize: 30,
+                                          fontWeight: FontWeight.w600),
+                                    ),
                                     SizedBox(
                                       height: 20,
                                     ),
-                                    Text("Easy Game $easy",  style: TextStyle(
-                                        fontSize: 23,
-                                        fontWeight: FontWeight.w300
-                                    ),),
+                                    Text(
+                                      "Easy Game $easy",
+                                      style: TextStyle(
+                                          fontSize: 23,
+                                          fontWeight: FontWeight.w300),
+                                    ),
                                     SizedBox(
                                       height: 8,
                                     ),
-                                    Text("Hard Game $hard",  style: TextStyle(
-                                        fontSize: 23,
-                                        fontWeight: FontWeight.w300
-                                    ),),
+                                    Text(
+                                      "Hard Game $hard",
+                                      style: TextStyle(
+                                          fontSize: 23,
+                                          fontWeight: FontWeight.w300),
+                                    ),
                                     SizedBox(
                                       height: 8,
                                     ),
-                                    Text("(Lower value is batter)"),
+                                    Text("(Score in time format)"),
                                   ],
                                 ),
                               );
                             });
                       },
                       child: Container(
-                        width: MediaQuery
-                            .of(context)
-                            .size
-                            .width,
+                        width: MediaQuery.of(context).size.width,
                         height: 50,
                         alignment: Alignment.center,
                         color: Colors.amber,

@@ -2,7 +2,7 @@
 import 'package:memory_game/model/TileModel.dart';
 
 int point = 0;
-int hpoint = 0;
+int hPoint = 0;
 bool isSelected = false;
 List<TileModel> pairs = new List<TileModel>();
 String selectedImagePath = "";

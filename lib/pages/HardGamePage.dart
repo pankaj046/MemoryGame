@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:memory_game/data/data.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HardGamePage extends StatefulWidget {
   @override
@@ -7,6 +10,9 @@ class HardGamePage extends StatefulWidget {
 }
 
 class _HardGamePageState extends State<HardGamePage> {
+  Timer _timer;
+  String period = "";
+
   @override
   void initState() {
     // TODO: implement initState
@@ -19,8 +25,58 @@ class _HardGamePageState extends State<HardGamePage> {
       setState(() {
         visiblePairs = getHQuestions();
         isSelected = false;
+        _gameTimer();
       });
     });
+  }
+
+  void _gameTimer() {
+    int second = 0, h = 0, m = 0, s = 0, temp = 0, i;
+
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      second++;
+
+      setState(() {
+        //For Hours
+        if (second >= 3600) {
+          temp = (second / 3600) as int;
+          h = temp;
+          for (i = 1; i <= temp; i++) {
+            second -= 3600;
+          }
+        } else {
+          h = 0;
+        }
+        //For Minutes
+        if (second >= 60) {
+          temp = (second / 60) as int;
+          m = temp;
+          for (i = 1; i <= temp; i++) {
+            second -= 60;
+          }
+        } else {
+          m = 0;
+        }
+        //For Seconds
+        if (second >= 1) {
+          s = second;
+        } else {
+          s = 0;
+        }
+      });
+      period = "$h:$m:$s";
+      print(period);
+
+      if (hPoint == 1200) {
+        _timer.cancel();
+        _saveScore(period);
+      }
+    });
+  }
+
+  void _saveScore(String score) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('HARD', score);
   }
 
   @override
@@ -28,10 +84,10 @@ class _HardGamePageState extends State<HardGamePage> {
     return MaterialApp(
       color: Colors.white,
       debugShowCheckedModeBanner: false,
-      home: hpoint != 1200
+      home: hPoint != 1200
           ? Scaffold(
-        backgroundColor: Colors.white,
-            body: SingleChildScrollView(
+              backgroundColor: Colors.white,
+              body: SingleChildScrollView(
                 child: Container(
                   // height: MediaQuery.of(context).size.height,
                   padding: EdgeInsets.symmetric(vertical: 50, horizontal: 50),
@@ -41,7 +97,7 @@ class _HardGamePageState extends State<HardGamePage> {
                       Column(
                         children: [
                           Text(
-                            "$hpoint/1200",
+                            "$hPoint/1200",
                             style: TextStyle(
                                 fontSize: 28,
                                 fontWeight: FontWeight.w500,
@@ -53,7 +109,7 @@ class _HardGamePageState extends State<HardGamePage> {
                             height: 5,
                           ),
                           Text(
-                            "Points",
+                              period == ""? "00:00:00":period,
                             style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w500,
@@ -71,7 +127,8 @@ class _HardGamePageState extends State<HardGamePage> {
                               mainAxisSpacing: 0.0,
                               maxCrossAxisExtent: 100,
                             ),
-                            children: List.generate(visiblePairs.length, (index) {
+                            children:
+                                List.generate(visiblePairs.length, (index) {
                               return Tile(
                                 imagePath: visiblePairs[index].getImagePath(),
                                 parent: this,
@@ -85,7 +142,7 @@ class _HardGamePageState extends State<HardGamePage> {
                   ),
                 ),
               ),
-          )
+            )
           : Container(
               color: Colors.white,
               padding: EdgeInsets.all(30),
@@ -110,9 +167,10 @@ class _HardGamePageState extends State<HardGamePage> {
                         borderRadius: BorderRadius.circular(24)),
                     child: GestureDetector(
                       onTap: () {
-                        hpoint = 0;
+                        hPoint = 0;
                         Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(builder: (context) => HardGamePage()),
+                            MaterialPageRoute(
+                                builder: (context) => HardGamePage()),
                             (Route<dynamic> route) => false);
                       },
                       child: Text(
@@ -156,7 +214,7 @@ class _TileState extends State<Tile> {
               print("OK");
               isSelected = true;
               Future.delayed(const Duration(seconds: 1), () {
-                hpoint = hpoint + 100;
+                hPoint = hPoint + 100;
                 setState(() {});
                 isSelected = false;
 
